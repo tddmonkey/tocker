@@ -6,6 +6,7 @@ import com.spotify.docker.client.DockerException
 import com.spotify.docker.client.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerConfig
+import com.spotify.docker.client.messages.PortBinding
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -20,12 +21,14 @@ class UsingADockerInstanceSpec extends Specification {
     private List<Container> removeAllCreatedContainers() {
         def client = DefaultDockerClient.fromEnv().build()
         def allContainers = client.listContainers(DockerClient.ListContainersParam.allContainers())
-        allContainers.findAll { container -> container.names().any { name -> name.startsWith("/$CONTAINER_PREFIX") }
-            .each {
+        allContainers.findAll { container ->
+            container.names().any { name -> name.startsWith("/dockertest") }
+        }
+            .each { container ->
+                println("Stopping " + container.id())
                 client.stopContainer(container.id(), 0)
                 client.removeContainer(container.id())
             }
-        }
     }
 
     def "provides host information"() {
@@ -83,6 +86,27 @@ class UsingADockerInstanceSpec extends Specification {
         then:
             def container = client.inspectContainer(containerName)
             assert container.created() != null
+    }
+
+    def "exposes ports to the host"() {
+        given:
+            def containerName = containerNameFor("exposes-ports")
+            def dockerInstance = DockerInstance
+                    .fromImage("redis")
+                    .withContainerName(containerName)
+                    .mappingPorts(PortMap.of(6379, 6380))
+                    .build()
+        when:
+            dockerInstance.run()
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.hostConfig().portBindings() == ['6379/tcp':[PortBinding.of("0.0.0.0", 6380)]]
+    }
+
+    def "hello"() {
+        expect:
+            println(client.inspectContainer('counts-redis-6385').hostConfig().portBindings())
+
     }
 
     def imageDoesNotExist(String imageName) {
