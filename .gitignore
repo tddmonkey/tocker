@@ -1,0 +1,9 @@
+.gradle/
+*.iml
+*.ipr
+*.iws
+out/
+build/
+target/
+.*.swp
+*~
