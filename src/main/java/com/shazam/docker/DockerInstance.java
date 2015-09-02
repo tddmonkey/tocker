@@ -1,9 +1,6 @@
 package com.shazam.docker;
 
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerCertificateException;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerException;
+import com.spotify.docker.client.*;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.ContainerInfo;
@@ -42,6 +39,11 @@ public class DockerInstance {
                 ContainerConfig containerConfig = ContainerConfig.builder()
                         .image(imageName)
                         .build();
+                try {
+                    client.inspectImage(imageName);
+                } catch (ImageNotFoundException infe) {
+                    client.pull(imageName);
+                }
                 ContainerCreation container = client.createContainer(containerConfig, containerName);
                 client.startContainer(container.id());
             }

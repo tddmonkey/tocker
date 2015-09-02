@@ -3,6 +3,7 @@ package com.shazam.docker
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerException
+import com.spotify.docker.client.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerConfig
 import spock.lang.Ignore
@@ -37,7 +38,7 @@ class UsingADockerInstanceSpec extends Specification {
 
     def "can start an existing stopped container"() {
         given:
-            def containerName = containerNameFor("redis")
+            def containerName = containerNameFor("start-existing")
             ensureContainerExistsFor(image: "redis", containerName: containerName)
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
         when:
@@ -49,7 +50,7 @@ class UsingADockerInstanceSpec extends Specification {
 
     def "can stop a running container"() {
         given:
-            def containerName = containerNameFor("redis")
+            def containerName = containerNameFor("stop-running")
             ensureContainerExistsFor(image: "redis", containerName: containerName)
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
             dockerInstance.run()
@@ -63,13 +64,33 @@ class UsingADockerInstanceSpec extends Specification {
 
     def "can start a non-existent container with an existing image"() {
         given:
-            def containerName = containerNameFor("redis")
+            def containerName = containerNameFor("image-doesntexist")
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
         when:
             dockerInstance.run()
         then:
             def container = client.inspectContainer(containerName)
             assert container.state().running() == true
+    }
+
+    def "will pull the image if it doesn't exist"() {
+        given:
+            def containerName = containerNameFor("pull")
+            imageDoesNotExist("tianon/true")
+            def dockerInstance = DockerInstance.fromImage("tianon/true").withContainerName(containerName).build()
+        when:
+            dockerInstance.run()
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.created() != null
+    }
+
+    def imageDoesNotExist(String imageName) {
+        try {
+            client.removeImage(imageName, true, false)
+        } catch (ImageNotFoundException infe) {
+            // ignore this, the image doesn't exist anyway
+        }
     }
 
     def containerNameFor(String name) {
@@ -82,9 +103,7 @@ class UsingADockerInstanceSpec extends Specification {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(map['image'])
                 .build()
-
-        def containerId
-        containerId = client.createContainer(containerConfig, containerName).id()
+        client.createContainer(containerConfig, containerName).id()
     }
 
     private ensureImageExists(DefaultDockerClient client) {
@@ -93,21 +112,5 @@ class UsingADockerInstanceSpec extends Specification {
         } catch (DockerException de) {
             client.pull("redis")
         }
-    }
-
-
-    @Ignore("this should be a specific test after we're sure we can start an image")
-    def "will pull the specified image if it doesn't exist locally"() {
-        given:
-            def client = DefaultDockerClient.fromEnv().build()
-//            client.listImages()
-            client.removeImage("scratch")
-            def dockerInstance = DockerInstance.fromImage("scratch").build()
-        when:
-            dockerInstance.run()
-        then:
-            client.inspectImage("scratch")
-            notThrown(Exception)
-
     }
 }
