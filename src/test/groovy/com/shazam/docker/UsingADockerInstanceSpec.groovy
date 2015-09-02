@@ -3,16 +3,10 @@ package com.shazam.docker
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerException
-import com.spotify.docker.client.DockerRequestException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerConfig
-import com.spotify.docker.client.messages.ContainerCreation
-import com.spotify.docker.client.messages.ContainerInfo
-import com.spotify.docker.client.messages.ContainerState
 import spock.lang.Ignore
 import spock.lang.Specification
-
-import static com.spotify.docker.client.DockerClient.ListContainersParam.allContainers
 
 class UsingADockerInstanceSpec extends Specification {
     def client = DefaultDockerClient.fromEnv().build()
@@ -47,7 +41,34 @@ class UsingADockerInstanceSpec extends Specification {
             ensureContainerExistsFor(image: "redis", containerName: containerName)
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
         when:
-            dockerInstance.isRunning()
+            dockerInstance.run()
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.state().running() == true
+    }
+
+    def "can stop a running container"() {
+        given:
+            def containerName = containerNameFor("redis")
+            ensureContainerExistsFor(image: "redis", containerName: containerName)
+            def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
+            dockerInstance.run()
+        when:
+            dockerInstance.stop()
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.state().running() == false
+
+    }
+
+    @Ignore("doing this one one after stopping")
+    def "can start a non-existent container with an existing image"() {
+        given:
+            def containerName = containerNameFor("redis")
+            ensureContainerExistsFor(image: "redis")
+            def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
+        when:
+            dockerInstance.run()
         then:
             def container = client.inspectContainer(containerName)
             assert container.state().running() == true
@@ -65,8 +86,7 @@ class UsingADockerInstanceSpec extends Specification {
                 .build()
 
         def containerId
-            containerId = client.createContainer(containerConfig, containerName).id()
-            client.startContainer(containerId)
+        containerId = client.createContainer(containerConfig, containerName).id()
     }
 
     private ensureImageExists(DefaultDockerClient client) {
@@ -86,7 +106,7 @@ class UsingADockerInstanceSpec extends Specification {
             client.removeImage("scratch")
             def dockerInstance = DockerInstance.fromImage("scratch").build()
         when:
-            dockerInstance.isRunning()
+            dockerInstance.run()
         then:
             client.inspectImage("scratch")
             notThrown(Exception)

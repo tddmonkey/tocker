@@ -2,12 +2,22 @@ package com.shazam.docker;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerCertificateException;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.DockerException;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DockerInstance {
 
+    private final String imageName;
+    private final String containerName;
     private DefaultDockerClient dockerClient;
 
     public DockerInstance(String imageName, String containerName) {
+        this.imageName = imageName;
+        this.containerName = containerName;
+
         try {
             dockerClient = DefaultDockerClient.fromEnv().build();
         } catch (DockerCertificateException e) {
@@ -23,12 +33,20 @@ public class DockerInstance {
         return dockerClient.getHost();
     }
 
-    public void isRunning() {
-//        dockerClient.
+    public void run() {
+        withClient((client) -> client.startContainer(containerName));
     }
 
-    public String containerName() {
-        return "";
+    public void stop() {
+        withClient((client) -> client.stopContainer(containerName, 10));
+    }
+
+    private void withClient(DockerCommand consumer) {
+        try {
+            consumer.runCommand(dockerClient);
+        } catch (Exception de) {
+            throw new RuntimeException(de);
+        }
     }
 
     private static class DockerInstanceBuilder {
@@ -47,5 +65,9 @@ public class DockerInstance {
             this.containerName = containerName;
             return this;
         }
+    }
+
+    private static interface DockerCommand {
+        public void runCommand(DockerClient dc) throws Exception;
     }
 }
