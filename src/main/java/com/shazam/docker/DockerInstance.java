@@ -4,9 +4,9 @@ import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerCertificateException;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerException;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.ContainerCreation;
+import com.spotify.docker.client.messages.ContainerInfo;
 
 public class DockerInstance {
 
@@ -34,7 +34,18 @@ public class DockerInstance {
     }
 
     public void run() {
-        withClient((client) -> client.startContainer(containerName));
+        withClient((client) -> {
+            try {
+                ContainerInfo containerInfo = client.inspectContainer(containerName);
+                client.startContainer(containerInfo.id());
+            } catch (DockerException de) {
+                ContainerConfig containerConfig = ContainerConfig.builder()
+                        .image(imageName)
+                        .build();
+                ContainerCreation container = client.createContainer(containerConfig, containerName);
+                client.startContainer(container.id());
+            }
+        });
     }
 
     public void stop() {

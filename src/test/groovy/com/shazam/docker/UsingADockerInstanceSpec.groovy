@@ -61,11 +61,9 @@ class UsingADockerInstanceSpec extends Specification {
 
     }
 
-    @Ignore("doing this one one after stopping")
     def "can start a non-existent container with an existing image"() {
         given:
             def containerName = containerNameFor("redis")
-            ensureContainerExistsFor(image: "redis")
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
         when:
             dockerInstance.run()
