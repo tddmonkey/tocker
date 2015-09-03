@@ -15,7 +15,7 @@ public class DockerInstance {
     private final String containerName;
     private HostConfig hostConfig;
     private DefaultDockerClient dockerClient;
-    private Supplier<Boolean> NOOP_UPCHECK = () -> true;
+    private AliveStrategy NOOP_UPCHECK = AliveStrategies.alwaysAlive();
 
     private DockerInstance(String imageName, String containerName, HostConfig hostConfig) {
         this.imageName = imageName;
@@ -49,32 +49,28 @@ public class DockerInstance {
         });
     }
 
-    public void run(Supplier<Boolean> upCheck, int timesToTry, int millisBetweenRetry) {
+    public void run(AliveStrategy aliveStrategyCheck) {
         withClient((client) -> {
             try {
-                startContainerIfNecessary(client, client.inspectContainer(containerName), upCheck);
+                startContainerIfNecessary(client, client.inspectContainer(containerName), aliveStrategyCheck);
             } catch (DockerException de) {
                 ensureImageExists(client);
                 ContainerCreation container = createContainer(client);
-                startContainer(client, container.id(), upCheck);
+                startContainer(client, container.id(), aliveStrategyCheck);
             }
         });
     }
 
-    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, Supplier<Boolean> upCheck) throws DockerException, InterruptedException {
+    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
         if (containerInfo.state().running() == false) {
             startContainer(client, containerInfo.id(), upCheck);
         }
     }
 
 
-    private void startContainer(DockerClient client, String containerId, Supplier<Boolean> upCheck) throws DockerException, InterruptedException {
+    private void startContainer(DockerClient client, String containerId, AliveStrategy upCheck) throws DockerException, InterruptedException {
         client.startContainer(containerId);
-        int timesToRetry = 5;
-        int timeBetweenRetries = 1;
-        while (timesToRetry > 0 && upCheck.get() != true) {
-            Thread.sleep(timeBetweenRetries);
-        }
+        upCheck.waitUntilAlive();
     }
 
     private ContainerCreation createContainer(DockerClient client) throws DockerException, InterruptedException {

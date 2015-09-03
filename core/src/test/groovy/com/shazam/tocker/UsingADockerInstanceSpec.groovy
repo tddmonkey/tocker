@@ -122,23 +122,18 @@ class UsingADockerInstanceSpec extends Specification {
 
     def "only returns from run when 'up' check returns true"() {
         given:
+            AliveStrategy aliveStrategy = Mock()
             def containerName = containerNameFor("start-already-running")
             def dockerInstance = DockerInstance
                     .fromImage("redis")
                     .withContainerName(containerName)
                     .build()
         when:
-            def timesLeftToBeCalled = 5
-            def timesCalled = 0
-            dockerInstance.run({
-                timesLeftToBeCalled--
-                timesCalled++
-                return timesLeftToBeCalled == 0
-            } as Supplier<Boolean>, timesLeftToBeCalled, 1)
+            dockerInstance.run(aliveStrategy)
         then:
+            1 * aliveStrategy.waitUntilAlive()
             def container = client.inspectContainer(containerName)
             assert container.state().running() == true
-            assert timesCalled == 5
     }
     
     def imageDoesNotExist(String imageName) {
