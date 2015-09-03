@@ -28,10 +28,8 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId "core"
             from components.java
-
-//            artifact sourceJar {
-//                classifier "sources"
-//            }
         }
     }
 }
+
+publish.dependsOn test
