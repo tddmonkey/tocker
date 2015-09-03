@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class DockerInstance {
 
@@ -14,6 +15,7 @@ public class DockerInstance {
     private final String containerName;
     private HostConfig hostConfig;
     private DefaultDockerClient dockerClient;
+    private Supplier<Boolean> NOOP_UPCHECK = () -> true;
 
     private DockerInstance(String imageName, String containerName, HostConfig hostConfig) {
         this.imageName = imageName;
@@ -38,24 +40,41 @@ public class DockerInstance {
     public void run() {
         withClient((client) -> {
             try {
-                startContainerIfNecessary(client, client.inspectContainer(containerName));
+                startContainerIfNecessary(client, client.inspectContainer(containerName), NOOP_UPCHECK);
             } catch (DockerException de) {
                 ensureImageExists(client);
                 ContainerCreation container = createContainer(client);
-                startContainer(client, container.id());
+                startContainer(client, container.id(), NOOP_UPCHECK);
             }
         });
     }
 
-    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo) throws DockerException, InterruptedException {
+    public void run(Supplier<Boolean> upCheck, int timesToTry, int millisBetweenRetry) {
+        withClient((client) -> {
+            try {
+                startContainerIfNecessary(client, client.inspectContainer(containerName), upCheck);
+            } catch (DockerException de) {
+                ensureImageExists(client);
+                ContainerCreation container = createContainer(client);
+                startContainer(client, container.id(), upCheck);
+            }
+        });
+    }
+
+    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, Supplier<Boolean> upCheck) throws DockerException, InterruptedException {
         if (containerInfo.state().running() == false) {
-            startContainer(client, containerInfo.id());
+            startContainer(client, containerInfo.id(), upCheck);
         }
     }
 
 
-    private void startContainer(DockerClient client, String containerId) throws DockerException, InterruptedException {
+    private void startContainer(DockerClient client, String containerId, Supplier<Boolean> upCheck) throws DockerException, InterruptedException {
         client.startContainer(containerId);
+        int timesToRetry = 5;
+        int timeBetweenRetries = 1;
+        while (timesToRetry > 0 && upCheck.get() != true) {
+            Thread.sleep(timeBetweenRetries);
+        }
     }
 
     private ContainerCreation createContainer(DockerClient client) throws DockerException, InterruptedException {

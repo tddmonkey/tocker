@@ -9,6 +9,8 @@ import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.PortBinding
 import spock.lang.Specification
 
+import java.util.function.Supplier
+
 class UsingADockerInstanceSpec extends Specification {
     def client = DefaultDockerClient.fromEnv().build()
     private static final String CONTAINER_PREFIX = "dockertest"
@@ -68,6 +70,7 @@ class UsingADockerInstanceSpec extends Specification {
         given:
             def containerName = containerNameFor("image-doesntexist")
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
+            ensureImageExists("redis")
         when:
             dockerInstance.run()
         then:
@@ -116,6 +119,27 @@ class UsingADockerInstanceSpec extends Specification {
             def container = client.inspectContainer(containerName)
             assert container.state().running() == true
     }
+
+    def "only returns from run when 'up' check returns true"() {
+        given:
+            def containerName = containerNameFor("start-already-running")
+            def dockerInstance = DockerInstance
+                    .fromImage("redis")
+                    .withContainerName(containerName)
+                    .build()
+        when:
+            def timesLeftToBeCalled = 5
+            def timesCalled = 0
+            dockerInstance.run({
+                timesLeftToBeCalled--
+                timesCalled++
+                return timesLeftToBeCalled == 0
+            } as Supplier<Boolean>, timesLeftToBeCalled, 1)
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.state().running() == true
+            assert timesCalled == 5
+    }
     
     def imageDoesNotExist(String imageName) {
         try {
@@ -138,9 +162,9 @@ class UsingADockerInstanceSpec extends Specification {
         client.createContainer(containerConfig, containerName).id()
     }
 
-    private ensureImageExists(DefaultDockerClient client) {
+    private ensureImageExists(imageName) {
         try {
-            client.inspectImage("redis")
+            client.inspectImage(imageName)
         } catch (DockerException de) {
             client.pull("redis")
         }
