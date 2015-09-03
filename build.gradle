@@ -15,10 +15,17 @@ subprojects {
     dependencies {
         testCompile(
                 "org.spockframework:spock-core:0.7-groovy-2.0",
+
         )
     }
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.5'
+}
+
+idea {
+    project {
+        languageLevel = '1.8'
+    }
 }
