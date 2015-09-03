@@ -1,10 +1,7 @@
 package com.shazam.docker;
 
 import com.spotify.docker.client.*;
-import com.spotify.docker.client.messages.ContainerConfig;
-import com.spotify.docker.client.messages.ContainerCreation;
-import com.spotify.docker.client.messages.HostConfig;
-import com.spotify.docker.client.messages.PortBinding;
+import com.spotify.docker.client.messages.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +15,7 @@ public class DockerInstance {
     private HostConfig hostConfig;
     private DefaultDockerClient dockerClient;
 
-    public DockerInstance(String imageName, String containerName, HostConfig hostConfig) {
+    private DockerInstance(String imageName, String containerName, HostConfig hostConfig) {
         this.imageName = imageName;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
@@ -41,7 +38,7 @@ public class DockerInstance {
     public void run() {
         withClient((client) -> {
             try {
-                startContainer(client, client.inspectContainer(containerName).id());
+                startContainerIfNecessary(client, client.inspectContainer(containerName));
             } catch (DockerException de) {
                 ensureImageExists(client);
                 ContainerCreation container = createContainer(client);
@@ -49,6 +46,13 @@ public class DockerInstance {
             }
         });
     }
+
+    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo) throws DockerException, InterruptedException {
+        if (containerInfo.state().running() == false) {
+            startContainer(client, containerInfo.id());
+        }
+    }
+
 
     private void startContainer(DockerClient client, String containerId) throws DockerException, InterruptedException {
         client.startContainer(containerId);
@@ -82,7 +86,7 @@ public class DockerInstance {
         }
     }
 
-    private static class DockerInstanceBuilder {
+    public static class DockerInstanceBuilder {
         private String imageName;
         private String containerName;
         private HostConfig hostConfig;

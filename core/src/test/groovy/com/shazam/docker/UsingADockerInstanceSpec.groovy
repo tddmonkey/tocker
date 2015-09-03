@@ -102,6 +102,21 @@ class UsingADockerInstanceSpec extends Specification {
             def container = client.inspectContainer(containerName)
             assert container.hostConfig().portBindings() == ['6379/tcp':[PortBinding.of("0.0.0.0", 6380)]]
     }
+
+    def "does not fail when starting an already running container"() {
+        given:
+            def containerName = containerNameFor("start-already-running")
+            def dockerInstance = DockerInstance
+                    .fromImage("redis")
+                    .withContainerName(containerName)
+                    .build()
+        when:
+            dockerInstance.run()
+            dockerInstance.run()
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.state().running() == true
+    }
     
     def imageDoesNotExist(String imageName) {
         try {
