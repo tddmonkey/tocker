@@ -102,13 +102,7 @@ class UsingADockerInstanceSpec extends Specification {
             def container = client.inspectContainer(containerName)
             assert container.hostConfig().portBindings() == ['6379/tcp':[PortBinding.of("0.0.0.0", 6380)]]
     }
-
-    def "hello"() {
-        expect:
-            println(client.inspectContainer('counts-redis-6385').hostConfig().portBindings())
-
-    }
-
+    
     def imageDoesNotExist(String imageName) {
         try {
             client.removeImage(imageName, true, false)
