@@ -1,4 +1,4 @@
-package com.shazam.docker;
+package com.shazam.tocker;
 
 public class PortMap {
     private final int containerPort;

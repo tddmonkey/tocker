@@ -1,7 +1,7 @@
 package com.shazam.tocker.redis;
 
-import com.shazam.docker.DockerInstance;
-import com.shazam.docker.PortMap;
+import com.shazam.tocker.DockerInstance;
+import com.shazam.tocker.PortMap;
 
 public class RedisInstance {
     private final DockerInstance redis;

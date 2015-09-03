@@ -1,4 +1,4 @@
-package com.shazam.docker;
+package com.shazam.tocker;
 
 import com.spotify.docker.client.*;
 import com.spotify.docker.client.messages.*;

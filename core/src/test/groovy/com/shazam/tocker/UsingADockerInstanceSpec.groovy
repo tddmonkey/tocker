@@ -1,4 +1,4 @@
-package com.shazam.docker
+package com.shazam.tocker
 
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
@@ -7,7 +7,6 @@ import com.spotify.docker.client.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.PortBinding
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class UsingADockerInstanceSpec extends Specification {
