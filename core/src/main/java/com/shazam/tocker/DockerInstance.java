@@ -14,13 +14,15 @@ public class DockerInstance {
     private final String imageName;
     private final String containerName;
     private HostConfig hostConfig;
+    private String[] env;
     private DefaultDockerClient dockerClient;
     private AliveStrategy NOOP_UPCHECK = AliveStrategies.alwaysAlive();
 
-    private DockerInstance(String imageName, String containerName, HostConfig hostConfig) {
+    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env) {
         this.imageName = imageName;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
+        this.env = env;
 
         try {
             dockerClient = DefaultDockerClient.fromEnv().build();
@@ -77,6 +79,7 @@ public class DockerInstance {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(imageName)
                 .hostConfig(hostConfig)
+                .env(env)
                 .build();
         return client.createContainer(containerConfig, containerName);
     }
@@ -105,13 +108,14 @@ public class DockerInstance {
         private String imageName;
         private String containerName;
         private HostConfig hostConfig;
+        private String[] env;
 
         public DockerInstanceBuilder(String imageName) {
             this.imageName = imageName;
         }
 
         public DockerInstance build() {
-            return new DockerInstance(imageName, containerName, hostConfig);
+            return new DockerInstance(imageName, containerName, hostConfig, env);
         }
 
         public DockerInstanceBuilder withContainerName(String containerName) {
@@ -124,6 +128,11 @@ public class DockerInstance {
             Map<String, List<PortBinding>> portBindings = new HashMap<>();
             portBindings.put(String.format("%d/tcp", portMap.containerPort()), Arrays.asList(portBinding));
             hostConfig = HostConfig.builder().portBindings(portBindings).build();
+            return this;
+        }
+
+        public DockerInstanceBuilder withEnv(String ... env) {
+            this.env = env;
             return this;
         }
     }
