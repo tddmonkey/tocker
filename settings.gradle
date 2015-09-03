@@ -1,1 +1,3 @@
 include 'core', 'redis'
+
+rootProject.name = "tocker"

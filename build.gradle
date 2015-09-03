@@ -1,5 +1,8 @@
 allprojects {
     apply plugin: 'idea'
+
+    group = "com.shazam.tocker"
+    version = "0.0.1"
 }
 
 subprojects {
