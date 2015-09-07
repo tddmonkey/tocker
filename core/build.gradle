@@ -26,7 +26,7 @@ publishing {
 
     publications {
         mavenJava(MavenPublication) {
-            artifactId "core"
+            artifactId "tocker-core"
             from components.java
         }
     }
