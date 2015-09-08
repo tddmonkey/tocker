@@ -3,36 +3,45 @@ package com.shazam.tocker;
 import com.spotify.docker.client.*;
 import com.spotify.docker.client.messages.*;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class DockerInstance {
 
     private final String imageName;
     private final String containerName;
+    private final ImageStrategy imageStrategy;
     private HostConfig hostConfig;
     private String[] env;
+    private Path dirToCustomDockerFile;
     private DefaultDockerClient dockerClient;
     private AliveStrategy NOOP_UPCHECK = AliveStrategies.alwaysAlive();
 
-    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env) {
+    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env, Path dirToCustomDockerFile, ImageStrategy imageStrategy) {
         this.imageName = imageName;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
         this.env = env;
+        this.dirToCustomDockerFile = dirToCustomDockerFile;
 
         try {
             dockerClient = DefaultDockerClient.fromEnv().build();
         } catch (DockerCertificateException e) {
             throw new RuntimeException(e);
         }
+
+        this.imageStrategy = imageStrategy;
     }
 
     public static DockerInstanceBuilder fromImage(String imageName) {
         return new DockerInstanceBuilder(imageName);
+    }
+
+    public static DockerInstanceBuilder fromFile(Path dir, String imageName) {
+        return new DockerInstanceBuilder(dir, imageName);
     }
 
     public String host() {
@@ -84,11 +93,11 @@ public class DockerInstance {
         return client.createContainer(containerConfig, containerName);
     }
 
-    private void ensureImageExists(DockerClient client) throws DockerException, InterruptedException {
+    private void ensureImageExists(DockerClient client) throws Exception {
         try {
             client.inspectImage(imageName);
         } catch (ImageNotFoundException infe) {
-            client.pull(imageName);
+            imageStrategy.loadImage(client);
         }
     }
 
@@ -105,6 +114,8 @@ public class DockerInstance {
     }
 
     public static class DockerInstanceBuilder {
+        private final ImageStrategy imageStrategy;
+        private Path dirToCustomDockerFile;
         private String imageName;
         private String containerName;
         private HostConfig hostConfig;
@@ -112,10 +123,17 @@ public class DockerInstance {
 
         public DockerInstanceBuilder(String imageName) {
             this.imageName = imageName;
+            this.imageStrategy = (client) -> client.pull(imageName);
+        }
+
+        public DockerInstanceBuilder(Path dirToCustomDockerFile, String imageName) {
+            this.imageName = imageName;
+            this.imageStrategy = (client) -> client.build(dirToCustomDockerFile, imageName);
+            this.dirToCustomDockerFile = dirToCustomDockerFile;
         }
 
         public DockerInstance build() {
-            return new DockerInstance(imageName, containerName, hostConfig, env);
+            return new DockerInstance(imageName, containerName, hostConfig, env, dirToCustomDockerFile, imageStrategy);
         }
 
         public DockerInstanceBuilder withContainerName(String containerName) {
@@ -139,5 +157,9 @@ public class DockerInstance {
 
     private static interface DockerCommand {
         public void runCommand(DockerClient dc) throws Exception;
+    }
+
+    private static interface ImageStrategy {
+        public void loadImage(DockerClient dc) throws Exception;
     }
 }
