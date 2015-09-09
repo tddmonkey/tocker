@@ -16,16 +16,14 @@ public class DockerInstance {
     private final ImageStrategy imageStrategy;
     private HostConfig hostConfig;
     private String[] env;
-    private Path dirToCustomDockerFile;
     private DefaultDockerClient dockerClient;
     private AliveStrategy NOOP_UPCHECK = AliveStrategies.alwaysAlive();
 
-    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env, Path dirToCustomDockerFile, ImageStrategy imageStrategy) {
+    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env, ImageStrategy imageStrategy) {
         this.imageName = imageName;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
         this.env = env;
-        this.dirToCustomDockerFile = dirToCustomDockerFile;
 
         try {
             dockerClient = DefaultDockerClient.fromEnv().build();
@@ -115,7 +113,6 @@ public class DockerInstance {
 
     public static class DockerInstanceBuilder {
         private final ImageStrategy imageStrategy;
-        private Path dirToCustomDockerFile;
         private String imageName;
         private String containerName;
         private HostConfig hostConfig;
@@ -129,11 +126,10 @@ public class DockerInstance {
         public DockerInstanceBuilder(Path dirToCustomDockerFile, String imageName) {
             this.imageName = imageName;
             this.imageStrategy = (client) -> client.build(dirToCustomDockerFile, imageName);
-            this.dirToCustomDockerFile = dirToCustomDockerFile;
         }
 
         public DockerInstance build() {
-            return new DockerInstance(imageName, containerName, hostConfig, env, dirToCustomDockerFile, imageStrategy);
+            return new DockerInstance(imageName, containerName, hostConfig, env, imageStrategy);
         }
 
         public DockerInstanceBuilder withContainerName(String containerName) {
