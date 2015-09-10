@@ -8,14 +8,15 @@ targetCompatibility = 1.8
 
 dependencies {
     compile(
-        'com.spotify:docker-client:3.1.0'
+        project(":core"),
+        'redis.clients:jedis:2.7.3'
     )
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId "tocker-core"
+            artifactId "tocker-redis"
             from components.java
         }
     }

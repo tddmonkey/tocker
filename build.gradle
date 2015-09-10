@@ -2,7 +2,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = "com.shazam.tocker"
-    version = "0.0.7"
+    version = "0.0.8-SNAPSHOT"
 }
 
 subprojects {
@@ -21,6 +21,23 @@ subprojects {
 
         )
     }
+
+    pluginManager.withPlugin("maven-publish", {
+        publishing {
+            repositories {
+                maven {
+                    def repo = project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases'
+                    url "http://maven.uk.shazamteam.net:8080/nexus/content/repositories/${repo}"
+                    credentials {
+                        username 'admin'
+                        password 'admin123'
+                    }
+                }
+            }
+        }
+
+        publish.dependsOn test
+    })
 }
 
 task wrapper(type: Wrapper) {
