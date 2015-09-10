@@ -3,9 +3,6 @@ plugins {
     id "maven-publish"
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 dependencies {
     compile(
         project(":core"),
