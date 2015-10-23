@@ -23,15 +23,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DockerInstance {
+import static com.shazam.tocker.AliveStrategies.alwaysAlive;
 
+public class DockerInstance {
     private final String imageName;
     private final String containerName;
     private final ImageStrategy imageStrategy;
     private HostConfig hostConfig;
     private String[] env;
     private DefaultDockerClient dockerClient;
-    private AliveStrategy NOOP_UPCHECK = AliveStrategies.alwaysAlive();
 
     private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env, ImageStrategy imageStrategy) {
         this.imageName = imageName;
@@ -61,15 +61,7 @@ public class DockerInstance {
     }
 
     public void run() {
-        withClient((client) -> {
-            try {
-                startContainerIfNecessary(client, client.inspectContainer(containerName), NOOP_UPCHECK);
-            } catch (DockerException de) {
-                ensureImageExists(client);
-                ContainerCreation container = createContainer(client);
-                startContainer(client, container.id(), NOOP_UPCHECK);
-            }
-        });
+        run(alwaysAlive());
     }
 
     public void run(AliveStrategy aliveStrategyCheck) {
@@ -85,11 +77,10 @@ public class DockerInstance {
     }
 
     private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
-        if (containerInfo.state().running() == false) {
+        if (!containerInfo.state().running()) {
             startContainer(client, containerInfo.id(), upCheck);
         }
     }
-
 
     private void startContainer(DockerClient client, String containerId, AliveStrategy upCheck) throws DockerException, InterruptedException {
         client.startContainer(containerId);

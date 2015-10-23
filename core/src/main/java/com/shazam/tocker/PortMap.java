@@ -12,13 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package com.shazam.tocker;
+ */
+package com.shazam.tocker;
 
 public class PortMap {
     private final int containerPort;
     private final int hostPort;
 
-    public PortMap(int containerPort, int hostPort) {
+    private PortMap(int containerPort, int hostPort) {
         this.containerPort = containerPort;
         this.hostPort = hostPort;
     }
