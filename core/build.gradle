@@ -1,6 +1,7 @@
 plugins {
 	id "java"
-    id "maven-publish"
+    id "signing"
+    id "maven"
 }
 
 dependencies {
@@ -9,11 +10,66 @@ dependencies {
     )
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId "tocker-core"
-            from components.java
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'tocker-core'
+                packaging 'jar'
+                description 'Tocker is there to help you using Docker in a development environment during automated tests'
+                url 'https://github.com/shazam/tocker'
+
+                scm {
+                    url 'https://github.com/shazam/tocker'
+                    connection 'scm:git:git://github.com/shazam/tocker.git'
+                    developerConnection 'scm:git:git@github.com:shazam/tocker.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mrwiggles'
+                        name 'Colin Vipurs'
+                    }
+                }
+            }
         }
     }
 }

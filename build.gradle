@@ -2,7 +2,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = "com.shazam.tocker"
-    version = "0.0.8-SNAPSHOT"
+    version = "0.0.8"
 }
 
 subprojects {
@@ -18,26 +18,8 @@ subprojects {
     dependencies {
         testCompile(
                 "org.spockframework:spock-core:1.0-groovy-2.4",
-
         )
     }
-
-    pluginManager.withPlugin("maven-publish", {
-        publishing {
-            repositories {
-                maven {
-                    def repo = project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases'
-                    url "http://maven.uk.shazamteam.net:8080/nexus/content/repositories/${repo}"
-                    credentials {
-                        username 'admin'
-                        password 'admin123'
-                    }
-                }
-            }
-        }
-
-        publish.dependsOn test
-    })
 }
 
 task wrapper(type: Wrapper) {
