@@ -1,3 +1,4 @@
 include 'core'
 
 rootProject.name = "tocker"
+project(":core").name = "tocker-core"
