@@ -54,3 +54,25 @@ When running Docker on a Windows or Mac you will be making use of boot2docker or
 # Recommendations
 
 Don't tear down the containers at the end of tests! You will incurr severe costs in terms of time for running your tests.  Containers are lightweight so can be left running during the development process.  Each test can start the container and if it is already alive you should not notice any difference to running a local instance of that infrastructure.  When starting a container the `AliveStrategy` is first consulted to see if anything actually has to happen.  With the Redis example above, once the container is running your tests run at the speed of unit tests.
+
+# Downloading
+## Maven
+```
+<dependency>
+   <groupId>com.shazam.tocker</groupId>
+   <artifactId>tocker-core</artifactId>
+   <version>0.0.9</version>
+</dependency>
+```
+
+## Gradle
+```
+com.shazam.tocker:tocker-core:0.0.9
+```
+
+# Building
+tocker is built using the Gradle wrapper and uses Spock for tests
+
+```
+$ ./gradlew test
+```
