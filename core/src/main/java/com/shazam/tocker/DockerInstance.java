@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
 
@@ -143,10 +144,11 @@ public class DockerInstance {
             return this;
         }
 
-        public DockerInstanceBuilder mappingPorts(PortMap portMap) {
-            PortBinding portBinding = PortBinding.of("0.0.0.0", portMap.localhostPort());
-            Map<String, List<PortBinding>> portBindings = new HashMap<>();
-            portBindings.put(String.format("%d/tcp", portMap.containerPort()), Arrays.asList(portBinding));
+        public DockerInstanceBuilder mappingPorts(PortMap ... portMaps) {
+            Map<String, List<PortBinding>> portBindings = Arrays.stream(portMaps).collect(Collectors.toMap(
+                (PortMap pm) -> String.format("%d/tcp", pm.containerPort()),
+                (PortMap pm) -> Arrays.asList(PortBinding.of("0.0.0.0", pm.localhostPort()))));
+            System.out.println(portBindings);
             hostConfig = HostConfig.builder().portBindings(portBindings).build();
             return this;
         }
