@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
 
 public class DockerInstance {
     private final String imageName;
@@ -145,10 +148,9 @@ public class DockerInstance {
         }
 
         public DockerInstanceBuilder mappingPorts(PortMap ... portMaps) {
-            Map<String, List<PortBinding>> portBindings = Arrays.stream(portMaps).collect(Collectors.toMap(
-                (PortMap pm) -> String.format("%d/tcp", pm.containerPort()),
-                (PortMap pm) -> Arrays.asList(PortBinding.of("0.0.0.0", pm.localhostPort()))));
-            System.out.println(portBindings);
+            Map<String, List<PortBinding>> portBindings = stream(portMaps).collect(toMap(
+                    pm -> String.format("%d/tcp", pm.containerPort()),
+                    pm -> asList(PortBinding.of("0.0.0.0", pm.localhostPort()))));
             hostConfig = HostConfig.builder().portBindings(portBindings).build();
             return this;
         }
