@@ -47,12 +47,12 @@ uploadArchives {
                 name 'tocker-core'
                 packaging 'jar'
                 description 'Tocker is there to help you using Docker in a development environment during automated tests'
-                url 'https://github.com/shazam/tocker'
+                url 'https://github.com/tddmonkey/tocker'
 
                 scm {
-                    url 'https://github.com/shazam/tocker'
-                    connection 'scm:git:git://github.com/shazam/tocker.git'
-                    developerConnection 'scm:git:git@github.com:shazam/tocker.git'
+                    url 'https://github.com/tddmonkey/tocker'
+                    connection 'scm:git:git://github.com/tddmonkey/tocker.git'
+                    developerConnection 'scm:git:git@github.com:tddmonkey/tocker.git'
                 }
 
                 licenses {

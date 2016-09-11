@@ -1,8 +1,8 @@
 allprojects {
     apply plugin: 'idea'
 
-    group = "com.shazam.tocker"
-    version = "0.0.10"
+    group = "com.github.tddmonkey"
+    version = "0.0.11-SNAPSHOT"
 }
 
 subprojects {
