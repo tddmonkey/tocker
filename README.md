@@ -76,3 +76,12 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 ```
 $ ./gradlew test
 ```
+# Change Log
+
+**Version 0.0.11 (2016-09-11)**
+
+* Upgraded Spotify client to 5.0.2
+* Added exception handling up-check
+* Fixed test on case-insensitive file systems
+* Upgraded to Gradle 3.0
+* Forked from the Shazam version
