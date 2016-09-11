@@ -15,9 +15,6 @@
  */
 package com.shazam.tocker
 
-import com.spotify.docker.client.DockerException
-import com.spotify.docker.client.ImageNotFoundException
-import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.PortBinding
 import spock.lang.Specification
 

@@ -15,15 +15,16 @@
  */
 package com.shazam.tocker;
 
-import com.spotify.docker.client.*;
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.DockerCertificateException;
+import com.spotify.docker.client.exceptions.DockerException;
+import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import com.spotify.docker.client.messages.*;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
 import static java.util.Arrays.asList;

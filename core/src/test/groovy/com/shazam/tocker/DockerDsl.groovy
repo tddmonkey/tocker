@@ -17,9 +17,8 @@ package com.shazam.tocker
 
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
-import com.spotify.docker.client.DockerException
-import com.spotify.docker.client.ImageNotFoundException
-import com.spotify.docker.client.messages.Container
+import com.spotify.docker.client.exceptions.DockerException
+import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 
 import static com.spotify.docker.client.DockerClient.ListContainersParam.allContainers
