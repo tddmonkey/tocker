@@ -28,6 +28,10 @@ public class PortMap {
         return new PortMap(containerPort, hostPort);
     }
 
+    public static PortMap ephemeral(int containerPort) {
+        return of(containerPort, 0);
+    }
+
     public int localhostPort() {
         return hostPort;
     }
