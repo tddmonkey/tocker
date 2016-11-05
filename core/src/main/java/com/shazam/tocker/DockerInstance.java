@@ -157,7 +157,7 @@ public class DockerInstance {
         public DockerInstanceBuilder mappingPorts(PortMap ... portMaps) {
             Map<String, List<PortBinding>> portBindings = stream(portMaps).collect(toMap(
                     pm -> String.format("%d/tcp", pm.containerPort()),
-                    pm -> singletonList(pm.localhostPort() != 0 ? PortBinding.of("", pm.localhostPort()) : PortBinding.randomPort(""))));
+                    pm -> singletonList(pm.toBinding())));
             hostConfig.portBindings(portBindings).build();
             return this;
         }

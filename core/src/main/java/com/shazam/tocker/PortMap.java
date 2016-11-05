@@ -15,28 +15,32 @@
  */
 package com.shazam.tocker;
 
+import com.spotify.docker.client.messages.PortBinding;
+
+import java.util.function.Supplier;
+
 public class PortMap {
     private final int containerPort;
-    private final int hostPort;
+    private Supplier<PortBinding> portBindingCreator;
 
-    private PortMap(int containerPort, int hostPort) {
+    private PortMap(int containerPort, Supplier<PortBinding> portBindingCreator) {
         this.containerPort = containerPort;
-        this.hostPort = hostPort;
+        this.portBindingCreator = portBindingCreator;
     }
 
     public static PortMap of(int containerPort, int hostPort) {
-        return new PortMap(containerPort, hostPort);
+        return new PortMap(containerPort, () -> PortBinding.of("", hostPort));
     }
 
     public static PortMap ephemeral(int containerPort) {
-        return of(containerPort, 0);
-    }
-
-    public int localhostPort() {
-        return hostPort;
+        return new PortMap(containerPort, () -> PortBinding.randomPort(""));
     }
 
     public int containerPort() {
         return containerPort;
+    }
+
+    PortBinding toBinding() {
+        return portBindingCreator.get();
     }
 }
