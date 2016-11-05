@@ -15,7 +15,7 @@
  */
 package com.shazam.tocker
 
-import com.spotify.docker.client.DefaultDockerClient
+import com.shazam.tocker.dsl.DockerDsl
 import spock.lang.Specification
 
 import java.nio.file.Paths
