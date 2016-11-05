@@ -99,15 +99,15 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 ## Maven
 ```
 <dependency>
-   <groupId>com.shazam.tocker</groupId>
+   <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.9</version>
+   <version>0.0.12</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.shazam.tocker:tocker-core:0.0.9
+com.github.tddmonkey:tocker-core:0.0.12
 ```
 
 # Building
