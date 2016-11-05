@@ -21,14 +21,18 @@ import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import com.spotify.docker.client.messages.*;
+import lombok.SneakyThrows;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 
 public class DockerInstance {
@@ -66,11 +70,12 @@ public class DockerInstance {
         return dockerClient.getHost();
     }
 
-    public void run() {
-        run(alwaysAlive());
+    public RunningDockerInstance run() {
+        return run(alwaysAlive());
     }
 
-    public void run(AliveStrategy aliveStrategyCheck) {
+    @SneakyThrows
+    public RunningDockerInstance run(AliveStrategy aliveStrategyCheck) {
         withClient((client) -> {
             try {
                 startContainerIfNecessary(client, client.inspectContainer(containerName), aliveStrategyCheck);
@@ -80,6 +85,7 @@ public class DockerInstance {
                 startContainer(client, container.id(), aliveStrategyCheck);
             }
         });
+        return RunningDockerInstance.from(dockerClient.inspectContainer(containerName));
     }
 
     private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
@@ -151,7 +157,7 @@ public class DockerInstance {
         public DockerInstanceBuilder mappingPorts(PortMap ... portMaps) {
             Map<String, List<PortBinding>> portBindings = stream(portMaps).collect(toMap(
                     pm -> String.format("%d/tcp", pm.containerPort()),
-                    pm -> asList(PortBinding.of("0.0.0.0", pm.localhostPort()))));
+                    pm -> singletonList(pm.toBinding())));
             hostConfig.portBindings(portBindings).build();
             return this;
         }

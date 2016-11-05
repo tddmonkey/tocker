@@ -8,6 +8,11 @@ dependencies {
     compile(
         'com.spotify:docker-client:5.0.2'
     )
+
+    compileOnly(
+        'org.projectlombok:lombok:1.16.10',
+    )
+
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

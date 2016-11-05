@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.shazam.tocker
+package com.shazam.tocker.dsl
 
 import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.DockerException
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
+import org.junit.Before
 
 import static com.spotify.docker.client.DockerClient.ListContainersParam.allContainers
 
@@ -27,6 +28,7 @@ trait DockerDsl {
     static final String CONTAINER_PREFIX = "dockertest"
     DockerClient client = DefaultDockerClient.fromEnv().build()
 
+    @Before
     def removeAllCreatedContainers() {
         def client = DefaultDockerClient.fromEnv().build()
         def allContainers = client.listContainers(allContainers())
