@@ -21,6 +21,7 @@ import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import com.spotify.docker.client.messages.*;
+import lombok.SneakyThrows;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -66,11 +67,12 @@ public class DockerInstance {
         return dockerClient.getHost();
     }
 
-    public void run() {
-        run(alwaysAlive());
+    public RunningDockerInstance run() {
+        return run(alwaysAlive());
     }
 
-    public void run(AliveStrategy aliveStrategyCheck) {
+    @SneakyThrows
+    public RunningDockerInstance run(AliveStrategy aliveStrategyCheck) {
         withClient((client) -> {
             try {
                 startContainerIfNecessary(client, client.inspectContainer(containerName), aliveStrategyCheck);
@@ -80,6 +82,7 @@ public class DockerInstance {
                 startContainer(client, container.id(), aliveStrategyCheck);
             }
         });
+        return RunningDockerInstance.from(dockerClient.inspectContainer(containerName));
     }
 
     private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
