@@ -47,9 +47,49 @@ private Boolean redisIsAcceptingConnections() {
 
 This will run the `redisIsAcceptingConnections` function every 100 milliseconds for a maximum of 10 times before giving up.  As soon as Redis is ready, the `run()` method will return control.
 
+# Mapping Ports
+
+In order to access the service in a container you will need to map ports to your local machine.  This can be done when creating the container.
+
+```
+this.instance = DockerInstance
+                .fromImage("redis")
+                .mappingPorts(PortMap.of(6379, 6380))
+                .withContainerName("my-redis-container")
+                .build()
+```
+
+The call to `mappingPorts` takes a list so you can map more than one port if necessary
+
+## Ephemeral Ports
+
+As of version 0.0.12 it is possible to use ephemeral ports when doing the mapping.  This is done by omitting the host port information in the map.
+
+```
+this.instance = DockerInstance
+                .fromImage("redis")
+                .mappingPorts(PortMap.of(6379))
+                .withContainerName("my-redis-container")
+                .build()
+```
+
+Note that specifying a host port of `0` *will not work*.
+
+In order to discover the ports used, after launching the container the port map can be inspected like this:
+
+```
+RunningDockerInstance instance = DockerInstance
+                .fromImage("redis")
+                .mappingPorts(PortMap.of(6379))
+                .withContainerName("my-redis-container")
+                .build();
+                
+int mappedPort = instance.mappedPorts().forContainerPort(6379);  
+```  
+
 # Fetching host information
 
-When running Docker on a Windows or Mac you will be making use of boot2docker or docker-machine, both of which mean that you cannot access the container on localhost.  Because of this a Docker instance will return the host you need to connect to.  Make sure you always use this rather than hardcoding an IP address which may change between machines.
+When running Docker on a Windows or Mac you might be making use of boot2docker or docker-machine, both of which mean that you cannot access the container on localhost.  Because of this a Docker instance will return the host you need to connect to.  Make sure you always use this rather than hardcoding an IP address which may change between machines.
 
 # Recommendations
 
@@ -77,6 +117,12 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 $ ./gradlew test
 ```
 # Change Log
+
+**Version 0.0.12 (2016-11-05)**
+
+* Added ability to get port map information from the running instance
+* Added ability to use ephemeral ports in port mappings
+* Upgraded to Gradle 3.1
 
 **Version 0.0.11 (2016-09-11)**
 
