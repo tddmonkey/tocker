@@ -4,8 +4,8 @@ import com.shazam.tocker.dsl.DockerDsl
 import spock.lang.Specification
 
 
-class LauchingARunningContainerSpec extends Specification implements DockerDsl {
-    def "will relaunch of port mapping has changed"() {
+class ReLauchingARunningContainerSpec extends Specification implements DockerDsl {
+    def "will rebuild container if port mapping has changed"() {
         given:
             def builder = DockerInstance
                     .fromImage("redis")
@@ -14,9 +14,28 @@ class LauchingARunningContainerSpec extends Specification implements DockerDsl {
             builder.build().run()
 
         when:
-            def instance = builder.mappingPorts(PortMap.of(6380, 6379)).build().run()
+            def instance = builder.mappingPorts(PortMap.of(6379, 6380)).build().run()
 
         then:
             instance.mappedPorts().forContainerPort(6379) == 6380
+    }
+
+    def "will rebuild container if image has changed"() {
+        given:
+            def containerName = containerNameFor("changed-config-spec")
+            DockerInstance
+                    .fromImage("redis:2.8")
+                    .withContainerName(containerName)
+                    .build()
+                    .run()
+
+        when:
+            DockerInstance.fromImage("redis:3.0")
+                .withContainerName(containerName)
+                .build()
+                .run()
+
+        then:
+            client.inspectContainer(containerName).config().image() == "redis:3.0"
     }
 }

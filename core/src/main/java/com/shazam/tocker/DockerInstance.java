@@ -91,6 +91,16 @@ public class DockerInstance {
     private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
         if (!containerInfo.state().running()) {
             startContainer(client, containerInfo.id(), upCheck);
+        } else {
+            ContainerConfig containerConfig = ContainerConfig.builder()
+                    .image(imageName)
+                    .hostConfig(hostConfig)
+                    .env(env)
+                    .build();
+            if (!containerInfo.config().equals(containerConfig)) {
+                client.removeContainer(containerInfo.id(), DockerClient.RemoveContainerParam.forceKill());
+                throw new DockerException("Forced so we recreated container");
+            }
         }
     }
 
