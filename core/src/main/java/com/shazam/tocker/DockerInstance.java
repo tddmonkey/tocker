@@ -85,22 +85,23 @@ public class DockerInstance {
                 startContainer(client, container.id(), aliveStrategyCheck);
             }
         });
-        return RunningDockerInstance.from(dockerClient.inspectContainer(containerName));
+        return RunningDockerInstance.from(dockerClient.inspectContainer(containerName), dockerClient);
     }
 
     private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
+        ContainerConfig containerConfig = ContainerConfig.builder()
+                .image(imageName)
+                .hostConfig(hostConfig)
+                .env(env)
+                .build();
+
+        if (!containerInfo.config().equals(containerConfig)) {
+            client.removeContainer(containerInfo.id(), DockerClient.RemoveContainerParam.forceKill());
+            throw new DockerException("Forced so we recreated container");
+        }
+
         if (!containerInfo.state().running()) {
             startContainer(client, containerInfo.id(), upCheck);
-        } else {
-            ContainerConfig containerConfig = ContainerConfig.builder()
-                    .image(imageName)
-                    .hostConfig(hostConfig)
-                    .env(env)
-                    .build();
-            if (!containerInfo.config().equals(containerConfig)) {
-                client.removeContainer(containerInfo.id(), DockerClient.RemoveContainerParam.forceKill());
-                throw new DockerException("Forced so we recreated container");
-            }
         }
     }
 
@@ -124,10 +125,6 @@ public class DockerInstance {
         } catch (ImageNotFoundException infe) {
             imageStrategy.loadImage(client);
         }
-    }
-
-    public void stop() {
-        withClient((client) -> client.stopContainer(containerName, 10));
     }
 
     private void withClient(DockerCommand consumer) {
