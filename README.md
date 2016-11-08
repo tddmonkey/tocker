@@ -101,13 +101,13 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 <dependency>
    <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.12</version>
+   <version>0.0.13</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.github.tddmonkey:tocker-core:0.0.12
+com.github.tddmonkey:tocker-core:0.0.13
 ```
 
 # Building
@@ -118,11 +118,15 @@ $ ./gradlew test
 ```
 # Change Log
 
+**Version 0.0.13 (2016-11-08)**
+
+* Will now rebuild containers if config has changed
+* Upgraded to Gradle 3.1
+
 **Version 0.0.12 (2016-11-05)**
 
 * Added ability to get port map information from the running instance
 * Added ability to use ephemeral ports in port mappings
-* Upgraded to Gradle 3.1
 
 **Version 0.0.11 (2016-09-11)**
 
