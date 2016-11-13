@@ -15,12 +15,12 @@
  */
 package com.shazam.tocker;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class AliveStrategies {
-    public static AliveStrategy retrying(Supplier<Boolean> upCheck, int timesToTry, int millisBetweenRetry) {
-        return () -> {
-            while (timesToTry > 0 && upCheck.get() != true) {
+    public static AliveStrategy retrying(Function<RunningDockerInstance, Boolean> upCheck, int timesToTry, int millisBetweenRetry) {
+        return (runningInstance) -> {
+            while (timesToTry > 0 && !upCheck.apply(runningInstance)) {
                 try {
                     Thread.sleep(millisBetweenRetry);
                 } catch (InterruptedException e) {
@@ -31,6 +31,6 @@ public class AliveStrategies {
     }
 
     public static AliveStrategy alwaysAlive() {
-        return () -> { };
+        return (runningInstance) -> { };
     }
 }

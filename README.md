@@ -101,13 +101,13 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 <dependency>
    <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.12</version>
+   <version>0.0.14</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.github.tddmonkey:tocker-core:0.0.12
+com.github.tddmonkey:tocker-core:0.0.14
 ```
 
 # Building
@@ -117,6 +117,10 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 $ ./gradlew test
 ```
 # Change Log
+
+**Version 0.0.14 (2016-11-13)**
+
+* Now passes an instance of `RunningDockerInstance` to an `AliveStrategy` so that ephemeral ports can be used when doing up checks
 
 **Version 0.0.12 (2016-11-05)**
 

@@ -16,7 +16,6 @@
 package com.shazam.tocker
 
 import com.shazam.tocker.dsl.DockerDsl
-import com.spotify.docker.client.messages.PortBinding
 import spock.lang.Specification
 
 class UsingADockerInstanceSpec extends Specification implements DockerDsl {
@@ -102,7 +101,30 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
         when:
             dockerInstance.run(aliveStrategy)
         then:
-            1 * aliveStrategy.waitUntilAlive()
+            1 * aliveStrategy.waitUntilAlive(*_)
             assert client.inspectContainer(containerName).state().running()
+    }
+
+    def "can reference running container in alive check"() {
+        given:
+            def instance = DockerInstance
+                .fromImage("redis")
+                .withContainerName(containerNameFor("alive-check"))
+                .mappingPorts(PortMap.of(6379, 6380))
+                .build()
+            AliveStrategy aliveStrategy = new CapturingAliveStrategy();
+
+        expect:
+            def returnedRunningInstance = instance.run(aliveStrategy)
+            aliveStrategy.runningInstance == returnedRunningInstance
+    }
+
+    class CapturingAliveStrategy implements AliveStrategy {
+        private RunningDockerInstance runningInstance
+
+        @Override
+        void waitUntilAlive(RunningDockerInstance runningInstance) {
+            this.runningInstance = runningInstance
+        }
     }
 }

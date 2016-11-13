@@ -16,5 +16,5 @@
 package com.shazam.tocker;
 
 public interface AliveStrategy {
-    void waitUntilAlive();
+    void waitUntilAlive(RunningDockerInstance runningInstance);
 }

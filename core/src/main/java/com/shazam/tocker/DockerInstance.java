@@ -24,13 +24,10 @@ import com.spotify.docker.client.messages.*;
 import lombok.SneakyThrows;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
@@ -76,56 +73,50 @@ public class DockerInstance {
 
     @SneakyThrows
     public RunningDockerInstance run(AliveStrategy aliveStrategyCheck) {
-        withClient((client) -> {
             try {
-                startContainerIfNecessary(client, client.inspectContainer(containerName), aliveStrategyCheck);
+                return startContainerIfNecessary(dockerClient.inspectContainer(containerName), aliveStrategyCheck);
             } catch (DockerException de) {
-                ensureImageExists(client);
-                ContainerCreation container = createContainer(client);
-                startContainer(client, container.id(), aliveStrategyCheck);
+                ensureImageExists();
+                ContainerCreation container = createContainer();
+                return startContainer(container.id(), aliveStrategyCheck);
             }
-        });
-        return RunningDockerInstance.from(dockerClient.inspectContainer(containerName));
     }
 
-    private void startContainerIfNecessary(DockerClient client, ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
+    private RunningDockerInstance startContainerIfNecessary(ContainerInfo containerInfo, AliveStrategy upCheck) throws DockerException, InterruptedException {
         if (!containerInfo.state().running()) {
-            startContainer(client, containerInfo.id(), upCheck);
+            return startContainer(containerInfo.id(), upCheck);
         }
+        return RunningDockerInstance.from(containerInfo);
     }
 
-    private void startContainer(DockerClient client, String containerId, AliveStrategy upCheck) throws DockerException, InterruptedException {
-        client.startContainer(containerId);
-        upCheck.waitUntilAlive();
+    private RunningDockerInstance startContainer(String containerId, AliveStrategy upCheck) throws DockerException, InterruptedException {
+        dockerClient.startContainer(containerId);
+        ContainerInfo containerInfo = dockerClient.inspectContainer(containerId);
+        RunningDockerInstance runningInstance = RunningDockerInstance.from(containerInfo);
+        upCheck.waitUntilAlive(runningInstance);
+        return runningInstance;
     }
 
-    private ContainerCreation createContainer(DockerClient client) throws DockerException, InterruptedException {
+    private ContainerCreation createContainer() throws DockerException, InterruptedException {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(imageName)
                 .hostConfig(hostConfig)
                 .env(env)
                 .build();
-        return client.createContainer(containerConfig, containerName);
+        return dockerClient.createContainer(containerConfig, containerName);
     }
 
-    private void ensureImageExists(DockerClient client) throws Exception {
+    private void ensureImageExists() throws Exception {
         try {
-            client.inspectImage(imageName);
+            dockerClient.inspectImage(imageName);
         } catch (ImageNotFoundException infe) {
-            imageStrategy.loadImage(client);
+            imageStrategy.loadImage(dockerClient);
         }
     }
 
+    @SneakyThrows
     public void stop() {
-        withClient((client) -> client.stopContainer(containerName, 10));
-    }
-
-    private void withClient(DockerCommand consumer) {
-        try {
-            consumer.runCommand(dockerClient);
-        } catch (Exception de) {
-            throw new RuntimeException(de);
-        }
+        dockerClient.stopContainer(containerName, 10);
     }
 
     public static class DockerInstanceBuilder {
@@ -135,12 +126,12 @@ public class DockerInstance {
         private HostConfig.Builder hostConfig = HostConfig.builder();
         private String[] env;
 
-        public DockerInstanceBuilder(String imageName) {
+        DockerInstanceBuilder(String imageName) {
             this.imageName = imageName;
             this.imageStrategy = (client) -> client.pull(imageName);
         }
 
-        public DockerInstanceBuilder(Path dirToCustomDockerFile, String imageName) {
+        DockerInstanceBuilder(Path dirToCustomDockerFile, String imageName) {
             this.imageName = imageName;
             this.imageStrategy = (client) -> client.build(dirToCustomDockerFile, imageName);
         }
@@ -173,11 +164,7 @@ public class DockerInstance {
         }
     }
 
-    private static interface DockerCommand {
-        public void runCommand(DockerClient dc) throws Exception;
-    }
-
-    private static interface ImageStrategy {
-        public void loadImage(DockerClient dc) throws Exception;
+    private interface ImageStrategy {
+        void loadImage(DockerClient dc) throws Exception;
     }
 }
