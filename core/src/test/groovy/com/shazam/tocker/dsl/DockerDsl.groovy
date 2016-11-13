@@ -41,7 +41,7 @@ trait DockerDsl {
         }
     }
 
-    def containerNameFor(String name) {
+    String containerNameFor(String name) {
         return "${CONTAINER_PREFIX}-$name-${UUID.randomUUID().toString()}"
     }
 
