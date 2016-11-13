@@ -68,7 +68,7 @@ As of version 0.0.12 it is possible to use ephemeral ports when doing the mappin
 ```
 this.instance = DockerInstance
                 .fromImage("redis")
-                .mappingPorts(PortMap.of(6379))
+                .mappingPorts(PortMap.ephemeral(6379))
                 .withContainerName("my-redis-container")
                 .build()
 ```
