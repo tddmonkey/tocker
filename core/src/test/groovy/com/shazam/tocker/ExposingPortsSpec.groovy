@@ -1,11 +1,12 @@
 package com.shazam.tocker
 
 import com.shazam.tocker.dsl.DockerDsl
+import com.shazam.tocker.dsl.RemoveAllContainersBefore
 import com.spotify.docker.client.messages.PortBinding
 import spock.lang.Specification
 
 
-class ExposingPortsSpec extends Specification implements DockerDsl {
+class ExposingPortsSpec extends Specification implements DockerDsl, RemoveAllContainersBefore {
     public static final int SERVICE1_CONTAINER_PORT = 9324
     public static final int SERVICE2_CONTAINER_PORT = 6660
 

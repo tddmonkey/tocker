@@ -16,15 +16,12 @@
 package com.shazam.tocker
 
 import com.shazam.tocker.dsl.DockerDsl
+import com.shazam.tocker.dsl.RemoveAllContainersBeforeSpec
 import spock.lang.Specification
 
 import java.nio.file.Paths
 
-class UsingADockerInstanceFromFileSpec extends Specification implements DockerDsl {
-    def setupSpec() {
-        removeAllCreatedContainers()
-    }
-
+class UsingADockerInstanceFromFileSpec extends Specification implements DockerDsl, RemoveAllContainersBeforeSpec {
     def "can launch a container from a local DockerFile"() {
         given:
             def imageName = "dockertest-custom-image"

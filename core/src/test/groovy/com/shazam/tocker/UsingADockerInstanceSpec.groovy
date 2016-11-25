@@ -16,14 +16,10 @@
 package com.shazam.tocker
 
 import com.shazam.tocker.dsl.DockerDsl
-import com.spotify.docker.client.messages.PortBinding
+import com.shazam.tocker.dsl.RemoveAllContainersBeforeSpec
 import spock.lang.Specification
 
-class UsingADockerInstanceSpec extends Specification implements DockerDsl {
-    def setupSpec() {
-        removeAllCreatedContainers()
-    }
-
+class UsingADockerInstanceSpec extends Specification implements DockerDsl, RemoveAllContainersBeforeSpec {
     def "provides host information"() {
         given:
             def dockerInstance = DockerInstance.fromImage("scratch").build()
