@@ -1,10 +1,13 @@
 package com.shazam.tocker;
 
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.messages.ContainerInfo;
 import com.spotify.docker.client.messages.PortBinding;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 
 import java.util.List;
@@ -14,13 +17,19 @@ import static java.util.stream.Collectors.toMap;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Accessors(fluent = true)
-@Getter
 public class RunningDockerInstance {
-    private final MappedPorts mappedPorts;
+    @Getter private final MappedPorts mappedPorts;
+    private final DockerClient dockerClient;
+    private final ContainerInfo containerInfo;
 
-    public static RunningDockerInstance from(ContainerInfo containerInfo) {
+    public static RunningDockerInstance from(ContainerInfo containerInfo, DefaultDockerClient dockerClient) {
         Map<String, List<PortBinding>> portBindings = containerInfo.networkSettings().ports();
-        return new RunningDockerInstance(mappedPortsFrom(portBindings));
+        return new RunningDockerInstance(mappedPortsFrom(portBindings), dockerClient, containerInfo);
+    }
+
+    @SneakyThrows
+    public void stop() {
+        dockerClient.stopContainer(containerInfo.name(), 10);
     }
 
     private static MappedPorts mappedPortsFrom(Map<String, List<PortBinding>> portBindings) {
