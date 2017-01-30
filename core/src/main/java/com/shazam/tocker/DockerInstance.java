@@ -86,13 +86,13 @@ public class DockerInstance {
         if (!containerInfo.state().running()) {
             return startContainer(containerInfo.id(), upCheck);
         }
-        return RunningDockerInstance.from(containerInfo);
+        return RunningDockerInstance.from(containerInfo, dockerClient);
     }
 
     private RunningDockerInstance startContainer(String containerId, AliveStrategy upCheck) throws DockerException, InterruptedException {
         dockerClient.startContainer(containerId);
         ContainerInfo containerInfo = dockerClient.inspectContainer(containerId);
-        RunningDockerInstance runningInstance = RunningDockerInstance.from(containerInfo);
+        RunningDockerInstance runningInstance = RunningDockerInstance.from(containerInfo, dockerClient);
         upCheck.waitUntilAlive(runningInstance);
         return runningInstance;
     }
@@ -112,11 +112,6 @@ public class DockerInstance {
         } catch (ImageNotFoundException infe) {
             imageStrategy.loadImage(dockerClient);
         }
-    }
-
-    @SneakyThrows
-    public void stop() {
-        dockerClient.stopContainer(containerName, 10);
     }
 
     public static class DockerInstanceBuilder {

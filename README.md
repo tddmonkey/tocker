@@ -118,6 +118,10 @@ $ ./gradlew test
 ```
 # Change Log
 
+**Version 0.0.15 (2017-01-30)**
+
+* `stop()` method moved to `RunningDockerInstance`
+
 **Version 0.0.14 (2016-11-13)**
 
 * Now passes an instance of `RunningDockerInstance` to an `AliveStrategy` so that ephemeral ports can be used when doing up checks
