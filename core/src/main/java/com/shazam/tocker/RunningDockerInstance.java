@@ -35,7 +35,7 @@ public class RunningDockerInstance {
     private static MappedPorts mappedPortsFrom(Map<String, List<PortBinding>> portBindings) {
         MappedPorts.MappedPortsBuilder mappedPortsBuilder = MappedPorts.builder();
         if (portBindings != null) {
-            Map<Integer, Integer> portMappings = portBindings.entrySet().stream().filter(e -> e.getValue() != null).collect(toMap(
+            Map<Integer, Integer> portMappings = portBindings.entrySet().stream().filter(e -> e.getValue().size() > 0).collect(toMap(
                     binding -> Integer.parseInt(binding.getKey().substring(0, binding.getKey().indexOf("/"))),
                     binding -> Integer.parseInt(binding.getValue().stream().findFirst().get().hostPort())));
             mappedPortsBuilder.portMaps(portMappings);
