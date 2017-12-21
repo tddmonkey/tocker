@@ -34,14 +34,16 @@ import static java.util.stream.Collectors.toMap;
 
 public class DockerInstance {
     private final String imageName;
+    private final String[] commands;
     private final String containerName;
     private final ImageStrategy imageStrategy;
     private HostConfig hostConfig;
     private String[] env;
     private DefaultDockerClient dockerClient;
 
-    private DockerInstance(String imageName, String containerName, HostConfig hostConfig, String[] env, ImageStrategy imageStrategy) {
+    private DockerInstance(String imageName, String[] commands, String containerName, HostConfig hostConfig, String[] env, ImageStrategy imageStrategy) {
         this.imageName = imageName;
+        this.commands = commands;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
         this.env = env;
@@ -101,6 +103,7 @@ public class DockerInstance {
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(imageName)
                 .hostConfig(hostConfig)
+                .cmd(commands)
                 .env(env)
                 .build();
         return dockerClient.createContainer(containerConfig, containerName);
@@ -117,6 +120,7 @@ public class DockerInstance {
     public static class DockerInstanceBuilder {
         private final ImageStrategy imageStrategy;
         private String imageName;
+        private String[] commands;
         private String containerName;
         private HostConfig.Builder hostConfig = HostConfig.builder();
         private String[] env;
@@ -132,7 +136,7 @@ public class DockerInstance {
         }
 
         public DockerInstance build() {
-            return new DockerInstance(imageName, containerName, hostConfig.build(), env, imageStrategy);
+            return new DockerInstance(imageName, commands, containerName, hostConfig.build(), env, imageStrategy);
         }
 
         public DockerInstanceBuilder withContainerName(String containerName) {
@@ -155,6 +159,11 @@ public class DockerInstance {
 
         public DockerInstanceBuilder withEnv(String ... env) {
             this.env = env;
+            return this;
+        }
+
+        public DockerInstanceBuilder withCommands(String ... commands) {
+            this.commands = commands;
             return this;
         }
     }
