@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     compile(
-        'com.spotify:docker-client:5.0.2'
+        'com.spotify:docker-client:8.9.1'
     )
 
     compileOnly(

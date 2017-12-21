@@ -47,9 +47,9 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
             def containerName = containerNameFor("stop-running")
             ensureContainerExistsFor(image: "redis", containerName: containerName)
             def dockerInstance = DockerInstance.fromImage("redis").withContainerName(containerName).build()
-            dockerInstance.run()
+            def runningInstance = dockerInstance.run()
         when:
-            dockerInstance.stop()
+            runningInstance.stop()
         then:
             assert !client.inspectContainer(containerName).state().running()
     }

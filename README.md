@@ -101,13 +101,13 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 <dependency>
    <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.14</version>
+   <version>0.0.16</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.github.tddmonkey:tocker-core:0.0.14
+com.github.tddmonkey:tocker-core:0.0.16
 ```
 
 # Building
@@ -117,6 +117,10 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 $ ./gradlew test
 ```
 # Change Log
+
+**Version 0.0.16 (2017-26-10)**
+
+* Upped version of Spotify Docker client to 8.9.1
 
 **Version 0.0.15 (2017-01-30)**
 
