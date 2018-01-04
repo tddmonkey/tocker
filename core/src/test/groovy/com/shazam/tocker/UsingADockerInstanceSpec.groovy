@@ -112,11 +112,28 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
                 .withContainerName(containerNameFor("alive-check"))
                 .mappingPorts(PortMap.of(6379, 6380))
                 .build()
-            AliveStrategy aliveStrategy = new CapturingAliveStrategy();
+            AliveStrategy aliveStrategy = new CapturingAliveStrategy()
 
         expect:
             def returnedRunningInstance = instance.run(aliveStrategy)
             aliveStrategy.runningInstance == returnedRunningInstance
+    }
+    
+    def 'can pass through commands to the container on instantiation'() {
+        given:
+            def containerName = containerNameFor('image-commands')
+            def instance = DockerInstance
+                .fromImage("redis")
+                .withCommands('redis-cli')
+                .withContainerName(containerName)
+                .build()
+    
+        when:
+            instance.run()
+        
+        then:
+            client.inspectContainer(containerName).args() == ['redis-cli']
+    
     }
 
     class CapturingAliveStrategy implements AliveStrategy {
