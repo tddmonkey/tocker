@@ -26,6 +26,7 @@ import lombok.SneakyThrows;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.shazam.tocker.AliveStrategies.alwaysAlive;
 import static java.util.Arrays.stream;
@@ -37,16 +38,19 @@ public class DockerInstance {
     private final String[] commands;
     private final String containerName;
     private final ImageStrategy imageStrategy;
-    private HostConfig hostConfig;
-    private String[] env;
-    private DefaultDockerClient dockerClient;
+    private final HostConfig hostConfig;
+    private final String[] env;
+    private final String[] usedContainerPorts;
+    private final DefaultDockerClient dockerClient;
 
-    private DockerInstance(String imageName, String[] commands, String containerName, HostConfig hostConfig, String[] env, ImageStrategy imageStrategy) {
+    private DockerInstance(String imageName, String[] commands, String containerName, HostConfig hostConfig,
+                           String[] env, ImageStrategy imageStrategy, String[] usedContainerPorts) {
         this.imageName = imageName;
         this.commands = commands;
         this.containerName = containerName;
         this.hostConfig = hostConfig;
         this.env = env;
+        this.usedContainerPorts = usedContainerPorts;
 
         try {
             dockerClient = DefaultDockerClient.fromEnv().build();
@@ -105,6 +109,7 @@ public class DockerInstance {
                 .hostConfig(hostConfig)
                 .cmd(commands)
                 .env(env)
+                .exposedPorts(usedContainerPorts)
                 .build();
         return dockerClient.createContainer(containerConfig, containerName);
     }
@@ -124,6 +129,7 @@ public class DockerInstance {
         private String containerName;
         private HostConfig.Builder hostConfig = HostConfig.builder();
         private String[] env;
+        private String[] usedContainerPorts;
 
         DockerInstanceBuilder(String imageName) {
             this.imageName = imageName;
@@ -136,7 +142,7 @@ public class DockerInstance {
         }
 
         public DockerInstance build() {
-            return new DockerInstance(imageName, commands, containerName, hostConfig.build(), env, imageStrategy);
+            return new DockerInstance(imageName, commands, containerName, hostConfig.build(), env, imageStrategy, usedContainerPorts);
         }
 
         public DockerInstanceBuilder withContainerName(String containerName) {
@@ -149,6 +155,8 @@ public class DockerInstance {
                     pm -> String.format("%d/tcp", pm.containerPort()),
                     pm -> singletonList(pm.toBinding())));
             hostConfig.portBindings(portBindings).build();
+            Set<String> usedContainerPorts = portBindings.keySet();
+            this.usedContainerPorts = usedContainerPorts.toArray(new String[usedContainerPorts.size()]);
             return this;
         }
 
