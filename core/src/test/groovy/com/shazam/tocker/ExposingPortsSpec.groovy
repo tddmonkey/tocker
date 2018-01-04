@@ -6,9 +6,10 @@ import spock.lang.Specification
 
 
 class ExposingPortsSpec extends Specification implements DockerDsl {
-    public static final int SERVICE1_CONTAINER_PORT = 9324
-    public static final int SERVICE2_CONTAINER_PORT = 6660
-
+    private static final int SERVICE1_CONTAINER_PORT = 9324
+    private static final int SERVICE2_CONTAINER_PORT = 6660
+    private static final int NOT_EXPOSED_BY_DEFAULT = 43728
+    
     DockerInstance.DockerInstanceBuilder dockerInstance
     String containerName
     RunningDockerInstance runningInstance
@@ -75,7 +76,19 @@ class ExposingPortsSpec extends Specification implements DockerDsl {
         then:
             thrown(IllegalArgumentException)
     }
-
+    
+    def "implicitly exposes docker-side ports when mapping is requested for non-exposed ports"() {
+        given:
+            dockerInstance.mappingPorts(PortMap.of(NOT_EXPOSED_BY_DEFAULT, NOT_EXPOSED_BY_DEFAULT))
+        
+        when:
+            containerIsRun()
+        
+        then:
+            def container = client.inspectContainer(containerName)
+            assert container.config().exposedPorts().contains("${NOT_EXPOSED_BY_DEFAULT}/tcp" as String)
+    }
+    
     void containerIsRun() {
         this.runningInstance = dockerInstance.build().run()
     }
