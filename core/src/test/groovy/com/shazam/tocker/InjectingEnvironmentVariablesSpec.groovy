@@ -4,9 +4,9 @@ import com.shazam.tocker.dsl.DockerDsl
 import spock.lang.Specification
 
 
-class ExposesEnvironmentVariablesSpec extends Specification implements DockerDsl {
+class InjectingEnvironmentVariablesSpec extends Specification implements DockerDsl {
     
-    def 'Environment variables specified at container creation time are available on the RunningInstance'() {
+    def 'are made available on the RunningInstance'() {
         given:
             def containerName = containerNameFor('expose-env-variable')
             def instance = DockerInstance
@@ -19,7 +19,7 @@ class ExposesEnvironmentVariablesSpec extends Specification implements DockerDsl
             instance.run().environmentVariables().DUMMY_ENV_VARIABLE == 'bob'
     }
     
-    def 'Environment variables are returned from the original container if an already-running container is retrieved'() {
+    def 'are overriden by the original container if an already-running container is retrieved'() {
         given:
             def containerName = containerNameFor('retrieve-old-env-variable')
         
