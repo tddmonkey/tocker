@@ -85,7 +85,11 @@ RunningDockerInstance instance = DockerInstance
                 .build();
                 
 int mappedPort = instance.mappedPorts().forContainerPort(6379);  
-```  
+```
+
+## Exposed Ports
+
+As of version 0.0.18 the ports exposed by an image will be automatically added based on the port mappings provided.  Prior to using this version if you try to map a port that isn't configured via the `EXPOSE` directive in the Dockerfile, it won't be mapped.
 
 # Fetching host information
 
@@ -101,13 +105,13 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 <dependency>
    <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.16</version>
+   <version>0.0.18</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.github.tddmonkey:tocker-core:0.0.16
+com.github.tddmonkey:tocker-core:0.0.18
 ```
 
 # Building
@@ -118,7 +122,16 @@ $ ./gradlew test
 ```
 # Change Log
 
-**Version 0.0.16 (2017-26-10)**
+**Version 0.0.18 (2018-01-05)**
+
+* Can now get env variables from a running container
+* Automatically adds port bindings to exposed ports
+
+**Version 0.0.17 (2017-12-21)**
+
+* Added ability to override CMD run on container start
+
+**Version 0.0.16 (2017-10-26)**
 
 * Upped version of Spotify Docker client to 8.9.1
 
