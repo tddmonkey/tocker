@@ -31,50 +31,50 @@ artifacts {
     archives sourcesJar
 }
 
-signing {
-    sign configurations.archives
-}
+//signing {
+//    sign configurations.archives
+//}
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+ //           beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+   //         repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+     //           authentication(userName: ossrhUsername, password: ossrhPassword)
+       //     }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+         //   snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+         //       authentication(userName: ossrhUsername, password: ossrhPassword)
+         //   }
 
-            pom.project {
-                name 'tocker-core'
-                packaging 'jar'
-                description 'Tocker is there to help you using Docker in a development environment during automated tests'
-                url 'https://github.com/tddmonkey/tocker'
+         //   pom.project {
+         //       name 'tocker-core'
+         //       packaging 'jar'
+         //       description 'Tocker is there to help you using Docker in a development environment during automated tests'
+         //       url 'https://github.com/tddmonkey/tocker'
 
-                scm {
-                    url 'https://github.com/tddmonkey/tocker'
-                    connection 'scm:git:git://github.com/tddmonkey/tocker.git'
-                    developerConnection 'scm:git:git@github.com:tddmonkey/tocker.git'
-                }
+           //     scm {
+          //          url 'https://github.com/tddmonkey/tocker'
+          //          connection 'scm:git:git://github.com/tddmonkey/tocker.git'
+          //          developerConnection 'scm:git:git@github.com:tddmonkey/tocker.git'
+          //      }
 
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
+          //      licenses {
+          //          license {
+          //              name 'The Apache Software License, Version 2.0'
+          //              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          //              distribution 'repo'
+           //         }
+           //     }
 
-                developers {
-                    developer {
-                        id 'mrwiggles'
-                        name 'Colin Vipurs'
-                    }
-                }
-            }
-        }
-    }
-}
+          //      developers {
+          //          developer {
+          //              id 'mrwiggles'
+          //              name 'Colin Vipurs'
+          //          }
+           //     }
+          //  }
+      //  }
+  //  }
+//}

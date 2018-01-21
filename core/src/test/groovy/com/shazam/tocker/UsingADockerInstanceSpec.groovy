@@ -30,6 +30,20 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
         expect:
             dockerInstance.host() == host
     }
+    
+    def "provides container IP on docker network bridge"() {
+        given:
+            def instance = DockerInstance
+                .fromImage("redis")
+                .withContainerName(containerNameFor('retrieve-ip'))
+                .build()
+    
+        when:
+            def runningInstance = instance.run()
+    
+        then:
+            runningInstance.ipAddress =~ '172\\.17\\.0\\.\\d{1,3}'
+    }
 
     def "can start an existing stopped container"() {
         given:
