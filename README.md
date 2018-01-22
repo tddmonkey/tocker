@@ -95,6 +95,12 @@ As of version 0.0.18 the ports exposed by an image will be automatically added b
 
 When running Docker on a Windows or Mac you might be making use of boot2docker or docker-machine, both of which mean that you cannot access the container on localhost.  Because of this a Docker instance will return the host you need to connect to.  Make sure you always use this rather than hardcoding an IP address which may change between machines.
 
+# Communication Between Containers
+
+As of 0.0.19, `RunningDockerInstance` provides the `internalIPAddress` method, which returns the container's IP on the docker subnet. Using this with original (not remapped) ports allows communication between containers.
+
+For example, if you had started a `mysql` container with a port mapping from `3306->32768`, you would access the container with `localhost:32768` from your host machine, but via `<internalIPAddress>:3306` from inside another container.
+
 # Recommendations
 
 Don't tear down the containers at the end of tests! You will incurr severe costs in terms of time for running your tests.  Containers are lightweight so can be left running during the development process.  Each test can start the container and if it is already alive you should not notice any difference to running a local instance of that infrastructure.  When starting a container the `AliveStrategy` is first consulted to see if anything actually has to happen.  With the Redis example above, once the container is running your tests run at the speed of unit tests.
@@ -121,6 +127,9 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 $ ./gradlew test
 ```
 # Change Log
+
+**Version 0.0.18 (2018-01-22)**
+* Can now retrieve internal Docker IP address for inter-container communication
 
 **Version 0.0.18 (2018-01-05)**
 
