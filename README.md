@@ -128,7 +128,7 @@ $ ./gradlew test
 ```
 # Change Log
 
-**Version 0.0.18 (2018-01-22)**
+**Version 0.0.19 (2018-01-22)**
 * Can now retrieve internal Docker IP address for inter-container communication
 
 **Version 0.0.18 (2018-01-05)**
