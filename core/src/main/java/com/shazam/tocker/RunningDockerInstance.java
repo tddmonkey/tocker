@@ -55,4 +55,8 @@ public class RunningDockerInstance {
         }
         return mappedPortsBuilder.build();
     }
+
+    public String internalIPAddress() {
+        return containerInfo.networkSettings().ipAddress();
+    }
 }
