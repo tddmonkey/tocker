@@ -2,7 +2,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = "com.github.tddmonkey"
-    version = "0.0.19-SNAPSHOT"
+    version = "0.0.19"
 }
 
 subprojects {
