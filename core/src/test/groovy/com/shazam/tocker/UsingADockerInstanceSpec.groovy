@@ -16,6 +16,8 @@
 package com.shazam.tocker
 
 import com.shazam.tocker.dsl.DockerDsl
+import com.spotify.docker.client.DefaultDockerClient
+import org.apache.commons.net.util.SubnetUtils
 import spock.lang.Specification
 
 class UsingADockerInstanceSpec extends Specification implements DockerDsl {
@@ -29,6 +31,20 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
             def host = client.host
         expect:
             dockerInstance.host() == host
+    }
+    
+    def "provides container IP on docker internal network"() {
+        given:
+            def instance = DockerInstance
+                .fromImage("redis")
+                .withContainerName(containerNameFor('retrieve-ip'))
+                .build()
+    
+        when:
+            def runningInstance = instance.run()
+        
+        then:
+            subnetForDockerEnvironment().isInRange(runningInstance.internalIPAddress())
     }
 
     def "can start an existing stopped container"() {
@@ -134,6 +150,11 @@ class UsingADockerInstanceSpec extends Specification implements DockerDsl {
         then:
             client.inspectContainer(containerName).args() == ['redis-cli']
     
+    }
+    
+    SubnetUtils.SubnetInfo subnetForDockerEnvironment() {
+        def client = DefaultDockerClient.fromEnv().build()
+        return new SubnetUtils(client.inspectNetwork("bridge").ipam().config().get(0).subnet()).getInfo()
     }
 
     class CapturingAliveStrategy implements AliveStrategy {

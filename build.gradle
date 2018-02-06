@@ -2,7 +2,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = "com.github.tddmonkey"
-    version = "0.0.18"
+    version = "0.0.19"
 }
 
 subprojects {
@@ -19,6 +19,7 @@ subprojects {
     dependencies {
         testCompile(
                 "org.spockframework:spock-core:1.0-groovy-2.4",
+                "commons-net:commons-net:3.6"
         )
     }
 }
