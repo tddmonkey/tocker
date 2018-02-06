@@ -128,6 +128,9 @@ $ ./gradlew test
 ```
 # Change Log
 
+**Version 0.0.20 (2018-02-06)**
+* Upped version of Spotify Docker client to 8.11.1
+
 **Version 0.0.19 (2018-01-22)**
 * Can now retrieve internal Docker IP address for inter-container communication
 
