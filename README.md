@@ -91,6 +91,19 @@ int mappedPort = instance.mappedPorts().forContainerPort(6379);
 
 As of version 0.0.18 the ports exposed by an image will be automatically added based on the port mappings provided.  Prior to using this version if you try to map a port that isn't configured via the `EXPOSE` directive in the Dockerfile, it won't be mapped.
 
+## Binding Mounts
+
+As of cersion 0.0.21 it is possible to mount a local filesystem into the container.  This is useful when running a container that needs local data providing.  This follows the same syntax as it would on the command line:
+
+```
+RunningDockerInstance instance = DockerInstance
+                .fromImage("nginx")
+                .mappingPorts(PortMap.ephemeral(80))
+                .withContainerName("my-nginx-container")
+                .binding("/path/to/local/content:/usr/share/nginx/html:ro")
+                .build();
+```
+
 # Fetching host information
 
 When running Docker on a Windows or Mac you might be making use of boot2docker or docker-machine, both of which mean that you cannot access the container on localhost.  Because of this a Docker instance will return the host you need to connect to.  Make sure you always use this rather than hardcoding an IP address which may change between machines.
@@ -111,13 +124,13 @@ Don't tear down the containers at the end of tests! You will incurr severe costs
 <dependency>
    <groupId>com.github.tddmonkey</groupId>
    <artifactId>tocker-core</artifactId>
-   <version>0.0.18</version>
+   <version>0.0.21</version>
 </dependency>
 ```
 
 ## Gradle
 ```
-com.github.tddmonkey:tocker-core:0.0.18
+com.github.tddmonkey:tocker-core:0.0.21
 ```
 
 # Building
@@ -127,6 +140,11 @@ tocker is built using the Gradle wrapper and uses Spock for tests
 $ ./gradlew test
 ```
 # Change Log
+
+**Version 0.0.21 (not yet released)**
+* Upped version of Spotify Docker client to 8.12.2
+* Upped version of Gradle to 4.7
+* Added support for `binding()` mounts
 
 **Version 0.0.20 (2018-02-06)**
 * Upped version of Spotify Docker client to 8.11.1
