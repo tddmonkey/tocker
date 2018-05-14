@@ -174,6 +174,11 @@ public class DockerInstance {
             this.commands = commands;
             return this;
         }
+
+        public DockerInstanceBuilder binding(String bind) {
+            this.hostConfig.binds(bind);
+            return this;
+        }
     }
 
     private interface ImageStrategy {

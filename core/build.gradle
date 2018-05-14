@@ -11,11 +11,11 @@ def sonatypeCreds = [
 
 dependencies {
     compile(
-        'com.spotify:docker-client:8.11.1'
+        'com.spotify:docker-client:8.11.2'
     )
 
     compileOnly(
-        'org.projectlombok:lombok:1.16.10',
+        'org.projectlombok:lombok:1.16.20',
     )
 
 }
