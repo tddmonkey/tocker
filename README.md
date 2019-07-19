@@ -141,6 +141,9 @@ $ ./gradlew test
 ```
 # Change Log
 
+**Version 0.0.22 (2019-07-19)**
+* Added support for `links()` so that containers can resolve each other by name or alias
+
 **Version 0.0.21 (2018-05-14)**
 * Upped version of Spotify Docker client to 8.12.2
 * Upped version of Gradle to 4.7
